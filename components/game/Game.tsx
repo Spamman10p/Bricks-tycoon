@@ -237,6 +237,28 @@ export default function Game() {
     setTimeout(() => setClickEffects((p) => p.filter((e) => e.id !== id)), 800);
   }, [state.followers, state.clout]);
 
+  const [showFlex, setShowFlex] = useState<{name: string, type: string} | null>(null);
+  
+  // Clear flex toast after 5s
+  useEffect(() => {
+     if (showFlex) {
+         const timer = setTimeout(() => setShowFlex(null), 5000);
+         return () => clearTimeout(timer);
+     }
+  }, [showFlex]);
+
+  const handleFlex = (platform: 'twitter' | 'telegram') => {
+      if (!showFlex) return;
+      const text = `Just bought ${showFlex.name} in @BricksAITycoonBot! I'm rich. 🧱💰 #BricksTycoon`;
+      if (platform === 'twitter') {
+          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+      } else {
+          // @ts-ignore
+          window.Telegram?.WebApp?.openTelegramLink(`https://t.me/share/url?url=https://t.me/BricksAITycoonBot&text=${encodeURIComponent(text)}`);
+      }
+      setShowFlex(null);
+  };
+
   const buy = (type: string, item: any, cost: number) => {
     if (state.bux >= cost) {
       const key = type === 'upgrade' ? 'upgrades' : type === 'item' ? 'items' : 'staff';
@@ -246,6 +268,9 @@ export default function Game() {
         [key]: { ...p[key as keyof GameState] as Record<string | number, number>, [item.id]: ((p[key as keyof GameState] as Record<string | number, number>)[item.id] || 0) + 1 },
         followers: p.followers + (type === 'upgrade' ? (item as Upgrade).baseIncome * 2 : 0),
       }));
+      
+      // Trigger Flex Mode
+      setShowFlex({ name: item.name, type });
     }
   };
 
@@ -262,6 +287,19 @@ export default function Game() {
 
       {/* Layer 1: Stats Header */}
       <StatsHeader balance={state.bux} profitPerSec={income} />
+
+      {/* FLEX TOAST */}
+      {showFlex && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-50 animate-bounce cursor-pointer">
+            <div className="glass-panel px-6 py-3 rounded-full border border-yellow-400 bg-black/80 flex items-center gap-3 shadow-[0_0_20px_rgba(250,204,21,0.5)]">
+                <span className="text-yellow-400 text-xs font-bold whitespace-nowrap">BOUGHT {showFlex.name.toUpperCase()}!</span>
+                <div className="flex gap-2">
+                    <button onClick={() => handleFlex('twitter')} className="text-lg hover:scale-110 transition-transform">🐦</button>
+                    <button onClick={() => handleFlex('telegram')} className="text-lg hover:scale-110 transition-transform">✈️</button>
+                </div>
+            </div>
+        </div>
+      )}
 
       {clickEffects.map((e) => (
         <div key={e.id} className="click-text pixel-font" style={{ left: e.x, top: e.y }}>+${e.val}</div>
@@ -344,6 +382,38 @@ export default function Game() {
                       <div className="text-5xl mb-3">👑</div><h3 className="text-2xl font-bold text-white pixel-font mb-1">LVL {state.clout}</h3><p className="text-purple-300 text-xs uppercase mb-4">Clout Multiplier</p>
                       <div className="bg-black/50 p-2 rounded text-green-400 font-mono text-sm border border-white/10">x{1 + state.clout * 0.5} Earnings</div>
                     </div>
+
+                    {/* REFERRAL HUB */}
+                    <div className="glass-panel p-4 rounded-xl border border-blue-500/30 bg-blue-900/10">
+                         <h3 className="text-blue-300 font-bold mb-2 text-sm uppercase">Invite & Earn</h3>
+                         <div className="flex gap-2">
+                            <button 
+                                onClick={() => {
+                                    // @ts-ignore
+                                    const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || 12345;
+                                    const link = `https://t.me/BricksAITycoonBot?start=ref_${tgId}`;
+                                    // @ts-ignore
+                                    window.Telegram?.WebApp?.openTelegramLink(`https://t.me/share/url?url=${link}&text=Stop being poor. Join me in Bricks Tycoon 🧱`);
+                                }} 
+                                className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-2 rounded font-bold text-sm"
+                            >
+                                INVITE FRIENDS
+                            </button>
+                            <button 
+                                onClick={() => {
+                                    // @ts-ignore
+                                    const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || 12345;
+                                    const link = `https://t.me/BricksAITycoonBot?start=ref_${tgId}`;
+                                    navigator.clipboard.writeText(link);
+                                    alert('Link Copied!');
+                                }}
+                                className="bg-gray-700 hover:bg-gray-600 text-white px-4 rounded"
+                            >
+                                📋
+                            </button>
+                         </div>
+                    </div>
+
                     {state.bux >= 10000000 ? (
                       <div className="bg-red-900/20 p-4 rounded-lg border border-red-500/50"><h3 className="text-red-400 font-bold mb-2">EXIT SCAM</h3><button onClick={doPrestige} className="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-6 rounded w-full shadow-lg shadow-red-900/50">RUG THE WORLD (+{Math.floor(state.bux / 10000000)})</button></div>
                     ) : <div className="p-4 rounded border border-gray-800 text-gray-600 text-xs">Need $10M to Prestige</div>}
