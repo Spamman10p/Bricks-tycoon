@@ -7,9 +7,10 @@ interface CoinLaunchpadProps {
     bux: number;
     luckBonus: number;
     onFinishLaunch: (profit: number, isRug: boolean) => void;
+    onPay: (amount: number) => void;
 }
 
-export default function CoinLaunchpad({ followers, bux, luckBonus, onFinishLaunch }: CoinLaunchpadProps) {
+export default function CoinLaunchpad({ followers, bux, luckBonus, onFinishLaunch, onPay }: CoinLaunchpadProps) {
     const [step, setStep] = useState<'create' | 'trading' | 'result'>('create');
     const [coinName, setCoinName] = useState('');
     const [ticker, setTicker] = useState('');
@@ -20,9 +21,9 @@ export default function CoinLaunchpad({ followers, bux, luckBonus, onFinishLaunc
 
     const startTrading = () => {
         if (bux < 500) return;
-        // Deduct cost in parent used onFinishLaunch logic or pre-check? 
-        // Logic in Game.tsx handles deduction if we just pass a negative profit or handle cost there.
-        // For now we assume safety check passes.
+
+        // Deduct cost
+        onPay(500);
 
         setStep('trading');
         setMarketCap(5000);
