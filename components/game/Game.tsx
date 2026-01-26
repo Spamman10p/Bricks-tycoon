@@ -330,6 +330,7 @@ export default function Game() {
                   followers={state.followers}
                   bux={state.bux}
                   luckBonus={state.staff['quant'] ? 0.05 : 0}
+                  onPay={(cost) => setState(p => ({ ...p, bux: p.bux - cost }))}
                   onFinishLaunch={(profit, isRug) => {
                     if (profit > 0) {
                       setState(p => ({ ...p, bux: p.bux + profit, followers: Math.floor(p.followers * (isRug ? 0.9 : 1.1)) }));
