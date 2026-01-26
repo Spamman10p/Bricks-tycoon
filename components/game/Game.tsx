@@ -123,17 +123,46 @@ export default function Game() {
     setIsLoaded(true);
   }, []);
 
+  // Sync to Supabase
+  const syncToSupabase = useCallback(async () => {
+    if (!state.bux && state.followers === 1) return; // Don't save empty state immediately
+
+    // Get Telegram User ID (mock or real)
+    // @ts-ignore
+    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    const telegram_id = tgUser?.id || 12345; // Fallback for dev/browser without TG
+    const username = tgUser?.username || 'Browser User';
+
+    try {
+      await fetch('/api/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          telegram_id,
+          username,
+          bux: state.bux,
+          followers: state.followers,
+          clout: state.clout,
+          game_state: state
+        }),
+      });
+      // console.log('Saved to Supabase');
+    } catch (e) {
+      console.error('Save failed:', e);
+    }
+  }, [state]);
+
   useEffect(() => {
     if (!isLoaded) return;
-    const interval = setInterval(() => {
-      localStorage.setItem('bricksTycoon', JSON.stringify(state));
-    }, 5000);
+    const interval = setInterval(syncToSupabase, 10000); // Sync every 10s
     return () => clearInterval(interval);
-  }, [state, isLoaded]);
+  }, [syncToSupabase, isLoaded]);
 
   useEffect(() => {
     let ips = 0;
-    
+
     // Upgrades (Passive $/sec)
     UPGRADES.forEach((u) => {
       ips += (state.upgrades[u.id] || 0) * u.baseIncome;
@@ -236,11 +265,11 @@ export default function Game() {
       {activePanel && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center pointer-events-auto">
           {/* Backdrop */}
-          <div 
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={() => setActivePanel(null)}
           />
-          
+
           {/* Panel */}
           <div className="relative w-full sm:max-w-md h-[70vh] sm:h-[80vh] slide-up z-10">
             <div className="glass-panel h-full rounded-t-3xl sm:rounded-3xl border-t-2 sm:border-2 border-yellow-500 shadow-2xl flex flex-col backdrop-blur-xl bg-black/90 mx-auto overflow-hidden">
