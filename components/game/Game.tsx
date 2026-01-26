@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { BackgroundManager } from './BackgroundManager';
@@ -97,6 +97,11 @@ export default function Game() {
   const [activePanel, setActivePanel] = useState<string | null>(null);
   const [clickEffects, setClickEffects] = useState<{ id: number; x: number; y: number; val: number }[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const stateRef = useRef(state);
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   useEffect(() => {
     const saved = localStorage.getItem('bricksTycoon');
@@ -125,13 +130,21 @@ export default function Game() {
 
   // Sync to Supabase
   const syncToSupabase = useCallback(async () => {
-    if (!state.bux && state.followers === 1) return; // Don't save empty state immediately
+    const currentState = stateRef.current;
+    if (!currentState.bux && currentState.followers === 1) return; // Don't save empty state immediately
 
     // Get Telegram User ID (mock or real)
     // @ts-ignore
     const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
     const telegram_id = tgUser?.id || 12345; // Fallback for dev/browser without TG
     const username = tgUser?.username || 'Browser User';
+    
+    // Get raw initData for validation
+    // @ts-ignore
+    const initData = window.Telegram?.WebApp?.initData;
+
+    // SAVE LOCALLY (Fix for "Auto Save Failed")
+    localStorage.setItem('bricksTycoon', JSON.stringify(currentState));
 
     try {
       await fetch('/api/save', {
@@ -142,17 +155,18 @@ export default function Game() {
         body: JSON.stringify({
           telegram_id,
           username,
-          bux: state.bux,
-          followers: state.followers,
-          clout: state.clout,
-          game_state: state
+          bux: currentState.bux,
+          followers: currentState.followers,
+          clout: currentState.clout,
+          game_state: currentState,
+          initData // Send for validation
         }),
       });
       // console.log('Saved to Supabase');
     } catch (e) {
       console.error('Save failed:', e);
     }
-  }, [state]);
+  }, []);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -187,7 +201,7 @@ export default function Game() {
     });
 
     // Calculate value of a single click (without clout multiplier first)
-    const baseClickVal = 1 + Math.floor(state.followers * 0.05);
+    const baseClickVal = 1 + Math.floor(state.followers * 0.005);
     const autoClickIncome = autoClicksPerSec * baseClickVal;
 
     ips += autoClickIncome;
@@ -208,7 +222,7 @@ export default function Game() {
 
   const handleClick = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
-    const val = Math.floor((1 + Math.floor(state.followers * 0.05)) * (1 + state.clout * 0.5));
+    const val = Math.floor((1 + Math.floor(state.followers * 0.005)) * (1 + state.clout * 0.5));
     setState((p) => ({ ...p, bux: p.bux + val }));
     let x: number, y: number;
     if ('touches' in e) {
