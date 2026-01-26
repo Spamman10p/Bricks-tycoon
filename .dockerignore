@@ -1,0 +1,8 @@
+﻿node_modules
+.next
+.git
+*.md
+.env*.local
+Dockerfile*
+docker-compose*
+.dockerignore
