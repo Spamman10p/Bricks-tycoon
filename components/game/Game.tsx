@@ -145,7 +145,7 @@ export default function Game() {
     const saved = localStorage.getItem('bricksTycoon');
     if (saved) {
       try {
-        setState(JSON.parse(saved));
+        const parsed = JSON.parse(saved); setState({ ...DEFAULT_STATE, ...parsed });
       } catch (e) {
         console.error('Failed to load save:', e);
       }
@@ -322,7 +322,7 @@ export default function Game() {
     <div className="w-full h-screen relative overflow-hidden flex flex-col bg-[#1a1a1a]">
       {/* Layer 0: Background & Dynamic City */}
       <BackgroundManager level={state.clout} />
-      <GoldenBrick baseIncome={income} />
+      <GoldenBrick baseIncome={income} onCollect={() => {}} />
 
       {/* Layer 1: Stats Header */}
       <StatsHeader balance={state.bux} profitPerSec={income} />
@@ -415,10 +415,10 @@ export default function Game() {
                   }}
                 />}
 
-                {activePanel === 'daily' && <DailyRewards bux={state.bux} onClaimDaily={(reward) => setState(p => ({...p, bux: p.bux + reward}))} />}
-            {activePanel === 'stats' && <Stats stats={state} income={income} />}
-            {activePanel === 'achievements' && <Achievements stats={state} bux={state.bux} onClaimReward={(id, reward) => setState(p => ({...p, bux: p.bux + reward}))} />}
-            {activePanel === 'tasks' && <Tasks tasks={[]} onUpdateTask={() => {}} onClaimReward={() => {}} />}
+                {activePanel === 'daily' && <DailyRewards lastClaim={state.lastDailyClaim} streak={state.dailyStreak} onClaim={(day) => { const reward = [100,250,500,1000,2500,5000,10000][day-1] || 100; setState(p => ({...p, bux: p.bux + reward, lastDailyClaim: new Date().toISOString(), dailyStreak: Math.min(day, 7)})); }} />}
+            {activePanel === 'stats' && <Stats stats={{ totalClicks: state.totalClicks, totalEarned: state.totalEarned, timePlayed: Date.now() - new Date(state.startDate).getTime(), bestCombo: 0, totalPrestiges: 0, highestBalance: state.highestBalance, totalSpent: state.totalSpent, startDate: state.startDate }} />}
+            {activePanel === 'achievements' && <Achievements stats={{ clicks: state.totalClicks, upgrades: Object.values(state.upgrades).reduce((a, b) => a + (b || 0), 0), prestiges: 0, totalEarned: state.totalEarned, maxUpgrades: UPGRADES.length }} unlocked={state.achievementsUnlocked} onClaim={(id, reward) => setState(p => ({...p, bux: p.bux + reward, achievementsUnlocked: [...p.achievementsUnlocked, id]}))} />}
+            {activePanel === 'tasks' && <Tasks tasks={[]} onClaim={(id) => {}} />}
             {activePanel === 'profile' && (
                   <div className="text-center space-y-4">
                     <div className="glass-panel p-6 rounded-xl border border-purple-500/30 bg-purple-900/10">

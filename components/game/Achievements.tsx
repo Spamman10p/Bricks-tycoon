@@ -142,7 +142,7 @@ const getProgressPercentage = (achievement: Achievement, stats: GameStats): numb
   return Math.min(percentage, 100);
 };
 
-export const Achievements: React.FC<AchievementsProps> = ({ stats, unlocked, onClaim }) => {
+export const Achievements: React.FC<AchievementsProps> = ({ stats, unlocked = [], onClaim }) => {
   const achievementsProgress: AchievementProgress[] = useMemo(() => {
     return ACHIEVEMENTS.map((achievement) => {
       const isUnlocked = isAchievementUnlocked(achievement, stats);
