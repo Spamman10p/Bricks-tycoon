@@ -11,6 +11,12 @@ import { UpgradeCard } from '../ui/UpgradeCard';
 import Launchpad from './Launchpad';
 import ConnectButton from '../wallet/ConnectButton';
 import { parseReferralParam } from '../../lib/referral';
+import GoldenBrick from './GoldenBrick';
+import { DailyRewards } from './DailyRewards';
+import OfflineEarnings from './OfflineEarnings';
+import { Achievements, ACHIEVEMENTS, GameStats } from './Achievements';
+import { Stats } from './Stats';
+import { Tasks } from './Tasks';
 
 interface GameState {
   bux: number;
@@ -19,6 +25,22 @@ interface GameState {
   items: Record<string, number>;
   staff: Record<string, number>;
   clout: number;
+  // Tracking fields
+  totalClicks: number;
+  totalEarned: number;
+  highestBalance: number;
+  totalSpent: number;
+  totalPrestiges: number;
+  // Daily rewards
+  lastDailyClaim: string | null;
+  dailyStreak: number;
+  // Achievements
+  achievementsUnlocked: string[];
+  achievementsClaimed: string[];
+  // Offline tracking
+  lastOnline: string;
+  taskLastReset: string;
+  startDate: string;
 }
 
 interface Upgrade {
@@ -83,6 +105,22 @@ const DEFAULT_STATE: GameState = {
   items: {},
   staff: {},
   clout: 0,
+  // Tracking
+  totalClicks: 0,
+  totalEarned: 0,
+  highestBalance: 0,
+  totalSpent: 0,
+  totalPrestiges: 0,
+  // Daily rewards
+  lastDailyClaim: null,
+  dailyStreak: 0,
+  // Achievements
+  achievementsUnlocked: [],
+  achievementsClaimed: [],
+  // Offline tracking
+  lastOnline: new Date().toISOString(),
+  taskLastReset: new Date().toISOString(),
+  startDate: new Date().toISOString(),
 };
 
 const format = (n: number): string => {
