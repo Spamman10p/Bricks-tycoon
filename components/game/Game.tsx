@@ -17,6 +17,7 @@ import OfflineEarnings from './OfflineEarnings';
 import { Achievements, ACHIEVEMENTS, GameStats } from './Achievements';
 import { Stats } from './Stats';
 import { Tasks } from './Tasks';
+import { SolanaWallet } from '../wallet/SolanaWallet';
 
 interface GameState {
   bux: number;
@@ -211,6 +212,19 @@ export default function Game() {
     const interval = setInterval(syncToSupabase, 10000); // Sync every 10s
     return () => clearInterval(interval);
   }, [syncToSupabase, isLoaded]);
+// Wallet rewards listener
+useEffect(() => {
+  const handleWalletRewards = (e: any) => {
+    const { bux, clout } = e.detail;
+    setState((p) => ({
+      ...p,
+      bux: p.bux + bux,
+      clout: p.clout + clout
+    }));
+  };
+  window.addEventListener('walletRewards', handleWalletRewards);
+  return () => window.removeEventListener('walletRewards', handleWalletRewards);
+}, []);
 
   useEffect(() => {
     let ips = 0;
@@ -427,6 +441,7 @@ export default function Game() {
                     </div>
 
                     {/* REFERRAL HUB */}
+{/* SOLANA WALLET */} <SolanaWallet />
                     <div className="glass-panel p-4 rounded-xl border border-blue-500/30 bg-blue-900/10">
                          <h3 className="text-blue-300 font-bold mb-2 text-sm uppercase">Invite & Earn</h3>
                          <div className="flex gap-2">
