@@ -261,7 +261,7 @@ export default function Game() {
   const handleClick = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     const val = Math.floor((1 + Math.floor(state.followers * 0.005)) * (1 + state.clout * 0.5));
-    setState((p) => ({ ...p, bux: p.bux + val }));
+    setState((p) => { const newBux = p.bux + val; return { ...p, bux: newBux, totalClicks: p.totalClicks + 1, totalEarned: p.totalEarned + val, highestBalance: Math.max(p.highestBalance, newBux) }; });
     let x: number, y: number;
     if ('touches' in e) {
       x = e.touches[0].clientX;
@@ -322,6 +322,7 @@ export default function Game() {
     <div className="w-full h-screen relative overflow-hidden flex flex-col bg-[#1a1a1a]">
       {/* Layer 0: Background & Dynamic City */}
       <BackgroundManager level={state.clout} />
+      <GoldenBrick baseIncome={income} />
 
       {/* Layer 1: Stats Header */}
       <StatsHeader balance={state.bux} profitPerSec={income} />
@@ -414,7 +415,11 @@ export default function Game() {
                   }}
                 />}
 
-                {activePanel === 'profile' && (
+                {activePanel === 'daily' && <DailyRewards bux={state.bux} onClaimDaily={(reward) => setState(p => ({...p, bux: p.bux + reward}))} />}
+            {activePanel === 'stats' && <Stats stats={state} income={income} />}
+            {activePanel === 'achievements' && <Achievements stats={state} bux={state.bux} onClaimReward={(id, reward) => setState(p => ({...p, bux: p.bux + reward}))} />}
+            {activePanel === 'tasks' && <Tasks tasks={[]} onUpdateTask={() => {}} onClaimReward={() => {}} />}
+            {activePanel === 'profile' && (
                   <div className="text-center space-y-4">
                     <div className="glass-panel p-6 rounded-xl border border-purple-500/30 bg-purple-900/10">
                       <div className="text-5xl mb-3">👑</div><h3 className="text-2xl font-bold text-white pixel-font mb-1">LVL {state.clout}</h3><p className="text-purple-300 text-xs uppercase mb-4">Clout Multiplier</p>
