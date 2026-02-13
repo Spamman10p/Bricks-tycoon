@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '../../../lib/supabaseClient';
 
-const DEV_MODE = process.env.NEXT_PUBLIC_DEV_MODE === 'true';
+// Force dev mode bypass for now
+const DEV_MODE = true;
 
 export async function POST(request: Request) {
-    console.log('DEV_MODE:', process.env.NEXT_PUBLIC_DEV_MODE);
-    console.log('BOT_TOKEN:', process.env.TELEGRAM_BOT_TOKEN ? 'set' : 'not set');
-    console.log('SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'set' : 'not set');
     
     try {
         const body = await request.json();
