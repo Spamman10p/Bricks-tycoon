@@ -10,7 +10,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing walletAddress' }, { status: 400 });
     }
 
-    const apiKey = apiKey || process.env.HELIUS_API_KEY || '21dbac4f-bd83-4558-af3e-31fd9ab91e0d';
+    const apiKey = process.env.HELIUS_API_KEY || '21dbac4f-bd83-4558-af3e-31fd9ab91e0d';
     if (!apiKey) {
       return NextResponse.json({ error: 'Helius API key not configured' }, { status: 500 });
     }
