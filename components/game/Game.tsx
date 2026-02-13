@@ -18,6 +18,7 @@ import { Achievements, ACHIEVEMENTS, GameStats } from './Achievements';
 import { Stats } from './Stats';
 import { Tasks } from './Tasks';
 import { SolanaWallet } from '../wallet/SolanaWallet';
+import Leaderboard from './Leaderboard';
 
 interface GameState {
   bux: number;
@@ -125,8 +126,11 @@ const DEFAULT_STATE: GameState = {
 };
 
 const format = (n: number): string => {
-  if (n >= 1000000) return (n / 1000000).toFixed(2) + 'M';
-  if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
+  if (n >= 1e15) return (n / 1e15).toFixed(2) + 'Qa';
+  if (n >= 1e12) return (n / 1e12).toFixed(2) + 'T';
+  if (n >= 1e9) return (n / 1e9).toFixed(2) + 'B';
+  if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'k';
   return n.toLocaleString();
 };
 
@@ -428,6 +432,8 @@ useEffect(() => {
                     }
                   }}
                 />}
+
+                {activePanel === 'leaderboard' && <Leaderboard currentBux={state.bux} currentClout={state.clout} />}
 
                 {activePanel === 'daily' && <DailyRewards lastClaim={state.lastDailyClaim} streak={state.dailyStreak} onClaim={(day) => { const reward = [100,250,500,1000,2500,5000,10000][day-1] || 100; setState(p => ({...p, bux: p.bux + reward, lastDailyClaim: new Date().toISOString(), dailyStreak: Math.min(day, 7)})); }} />}
             {activePanel === 'stats' && <Stats stats={{ totalClicks: state.totalClicks, totalEarned: state.totalEarned, timePlayed: Date.now() - new Date(state.startDate).getTime(), bestCombo: 0, totalPrestiges: 0, highestBalance: state.highestBalance, totalSpent: state.totalSpent, startDate: state.startDate }} />}
