@@ -21,9 +21,10 @@ export const SolanaProviders: FC<SolanaProvidersProps> = ({ children }) => {
   // Use mainnet for production
   const network = WalletAdapterNetwork.Mainnet;
   
-  // Helius RPC endpoint with the API key
+  // Helius RPC endpoint - MUST use env var, never hardcode
+  // SECURITY: Read from NEXT_PUBLIC_HELIUS_API_KEY env var
   const endpoint = useMemo(
-    () => `https://mainnet.helius-rpc.com/?api-key=21dbac4f-bd83-4558-af3e-31fd9ab91e0d`,
+    () => `https://mainnet.helius-rpc.com/?api-key=${process.env.NEXT_PUBLIC_HELIUS_API_KEY}`,
     []
   );
 
