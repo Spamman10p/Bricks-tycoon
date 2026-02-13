@@ -20,6 +20,7 @@ import { Tasks } from './Tasks';
 import { SolanaWallet } from '../wallet/SolanaWallet';
 import Leaderboard from './Leaderboard';
 import EventsSystem from './EventsSystem';
+import SoundManager from './SoundManager';
 
 interface GameState {
   bux: number;
@@ -281,6 +282,7 @@ useEffect(() => {
     e.preventDefault();
     const val = Math.floor((1 + Math.floor(state.followers * 0.005)) * (1 + state.clout * 0.5));
     setState((p) => { const newBux = p.bux + val; return { ...p, bux: newBux, totalClicks: p.totalClicks + 1, totalEarned: p.totalEarned + val, highestBalance: Math.max(p.highestBalance, newBux) }; });
+    if ((window as any).playClickSound) (window as any).playClickSound();
     let x: number, y: number;
     if ('touches' in e) {
       x = e.touches[0].clientX;
@@ -318,6 +320,7 @@ useEffect(() => {
 
   const buy = (type: string, item: any, cost: number) => {
     if (state.bux >= cost) {
+      if ((window as any).playUpgradeSound) (window as any).playUpgradeSound();
       const key = type === 'upgrade' ? 'upgrades' : type === 'item' ? 'items' : 'staff';
       setState((p) => ({
         ...p,
@@ -334,11 +337,13 @@ useEffect(() => {
   const doPrestige = () => {
     if (state.bux < 10000000) return;
     const earned = Math.floor(state.bux / 10000000);
+    if ((window as any).playPrestigeSound) (window as any).playPrestigeSound();
     setState({ ...DEFAULT_STATE, clout: state.clout + earned });
   };
 
   return (
     <div className="w-full h-screen relative overflow-hidden flex flex-col bg-[#1a1a1a]">
+      <SoundManager />
       {/* Layer 0: Background & Dynamic City */}
       <BackgroundManager level={state.clout} />
       <GoldenBrick baseIncome={income} onCollect={() => {}} />

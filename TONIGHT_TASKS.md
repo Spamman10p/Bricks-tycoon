@@ -27,3 +27,5 @@
 - 00:35 - ✅ Referral system confirmed wired
 - 00:36 - ✅ Leaderboard added
 - 00:38 - ✅ Deployed to Vercel
+- 00:45 - ✅ Events System added
+- 00:50 - ✅ Deployed
