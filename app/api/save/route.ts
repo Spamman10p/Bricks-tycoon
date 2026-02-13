@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '../../../lib/supabaseClient';
+import { supabaseAdmin } from '../../../lib/supabaseClient';
 import crypto from 'crypto';
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
         }
 
         // 2. Fetch Current State from DB using SERVICE ROLE (bypass RLS) to ensure we get truth
-        const { data: currentUser, error: fetchError } = await supabase
+        const { data: currentUser, error: fetchError } = await supabaseAdmin!
             .from('users')
             .select('*')
             .eq('telegram_id', telegram_id)
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
         }
 
         // 4. Upsert with Service Role (secure)
-        const { data, error } = await supabase
+        const { data, error } = await supabaseAdmin!
             .from('users')
             .upsert(
                 {
