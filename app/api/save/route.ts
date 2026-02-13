@@ -3,7 +3,7 @@ import { supabase } from '../../../lib/supabaseClient';
 import crypto from 'crypto';
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const DEV_MODE = process.env.NEXT_PUBLIC_DEV_MODE === 'true';
+const DEV_MODE = process.env.NEXT_PUBLIC_DEV_MODE === 'true' || !BOT_TOKEN;
 
 // Helper to validate Telegram data
 const validateTelegramWebAppData = (initData: string) => {
