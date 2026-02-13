@@ -53,7 +53,12 @@ export async function POST(request: Request) {
         }
 
         // 2. Fetch Current State from DB using SERVICE ROLE (bypass RLS) to ensure we get truth
-        const { data: currentUser, error: fetchError } = await supabaseAdmin!
+        if (!supabaseAdmin) {
+            console.error('SUPABASE_SERVICE_ROLE_KEY not configured');
+            return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
+        }
+        
+        const { data: currentUser, error: fetchError } = await supabaseAdmin
             .from('users')
             .select('*')
             .eq('telegram_id', telegram_id)
@@ -90,7 +95,7 @@ export async function POST(request: Request) {
         }
 
         // 4. Upsert with Service Role (secure)
-        const { data, error } = await supabaseAdmin!
+        const { data, error } = await supabaseAdmin
             .from('users')
             .upsert(
                 {
