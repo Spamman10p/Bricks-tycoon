@@ -10,8 +10,8 @@
 - [x] 4. Launchpad - Already wired up and working
 
 ### Phase 2: Engagement (Medium Priority)
-- [ ] 5. Leaderboard - Local stats comparison
-- [ ] 6. Events System - Limited time bonuses
+- [x] 5. Leaderboard - Local stats comparison
+- [x] 6. Events System - Limited time bonuses
 - [ ] 7. Sound Effects - Click/upgrade sounds
 
 ### Phase 3: Polish (Lower Priority)
@@ -25,4 +25,5 @@
 - 00:32 - ✅ Prestige System - Already exists (10M bux = +1 Clout)
 - 00:35 - ✅ Launchpad confirmed working
 - 00:35 - ✅ Referral system confirmed wired
-- 00:36 - Build passes
+- 00:36 - ✅ Leaderboard added
+- 00:38 - ✅ Deployed to Vercel

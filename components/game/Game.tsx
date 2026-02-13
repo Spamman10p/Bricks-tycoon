@@ -19,6 +19,7 @@ import { Stats } from './Stats';
 import { Tasks } from './Tasks';
 import { SolanaWallet } from '../wallet/SolanaWallet';
 import Leaderboard from './Leaderboard';
+import EventsSystem from './EventsSystem';
 
 interface GameState {
   bux: number;
@@ -341,6 +342,7 @@ useEffect(() => {
       {/* Layer 0: Background & Dynamic City */}
       <BackgroundManager level={state.clout} />
       <GoldenBrick baseIncome={income} onCollect={() => {}} />
+      <EventsSystem onBonusApply={(bonus) => {}} />
 
       {/* Layer 1: Stats Header */}
       <StatsHeader balance={state.bux} profitPerSec={income} />
