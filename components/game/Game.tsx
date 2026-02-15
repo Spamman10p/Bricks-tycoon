@@ -340,15 +340,13 @@ export default function Game() {
   useEffect(() => {
     let ips = 0;
 
-    // Upgrades (Passive $/sec)
+    // Upgrades (Passive $/sec) - Uses 30% scaling
     UPGRADES.forEach((u) => {
-      ips += (state.upgrades[u.id] || 0) * u.baseIncome;
+      const level = state.upgrades[u.id] || 0;
+      ips += getUpgradeIncome(u.baseIncome, level);
     });
 
-    // Assets (Passive $/sec)
-    ASSETS.forEach((a) => {
-      if (state.items[a.id]) ips += a.income;
-    });
+    // Assets (CITY/FLEX items) - REMOVED: Now boost click value instead
 
     // Special Upgrade Effect
     if (state.upgrades[2]) {
