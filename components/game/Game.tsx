@@ -62,6 +62,7 @@ interface Asset {
   name: string;
   cost: number;
   income: number;
+  clickValue: number;
   icon: string;
 }
 
@@ -97,38 +98,14 @@ const getUpgradeIncome = (baseIncome: number, ownedLevel: number): number => {
 };
 
 const ASSETS: Asset[] = [
-  { id: "rolex", name: "Gold Rolex", cost: 50000, income: 200, icon: "⌚" },
-  {
-    id: "designer",
-    name: "Designer Drip",
-    cost: 250000,
-    income: 1200,
-    icon: "🧥",
-  },
-  { id: "lambo", name: "Lambo", cost: 1000000, income: 5000, icon: "🚗" },
-  { id: "yacht", name: "Yacht", cost: 5000000, income: 25000, icon: "🛥️" },
-  { id: "jet", name: "Private Jet", cost: 15000000, income: 80000, icon: "✈️" },
-  {
-    id: "penthouse",
-    name: "Penthouse",
-    cost: 35000000,
-    income: 200000,
-    icon: "🏙️",
-  },
-  {
-    id: "island",
-    name: "Private Island",
-    cost: 150000000,
-    income: 900000,
-    icon: "🏝️",
-  },
-  {
-    id: "moon",
-    name: "Moon Base",
-    cost: 500000000,
-    income: 3500000,
-    icon: "🌑",
-  },
+  { id: "rolex", name: "Gold Rolex", cost: 50000, income: 0, clickValue: 100, icon: "⌚" },
+  { id: "designer", name: "Designer Drip", cost: 250000, income: 0, clickValue: 500, icon: "🧥" },
+  { id: "lambo", name: "Lambo", cost: 1000000, income: 0, clickValue: 2000, icon: "🚗" },
+  { id: "yacht", name: "Yacht", cost: 5000000, income: 0, clickValue: 10000, icon: "🛥️" },
+  { id: "jet", name: "Private Jet", cost: 15000000, income: 0, clickValue: 30000, icon: "✈️" },
+  { id: "penthouse", name: "Penthouse", cost: 35000000, income: 0, clickValue: 50000, icon: "🏙️" },
+  { id: "island", name: "Private Island", cost: 150000000, income: 0, clickValue: 100000, icon: "🏝️" },
+  { id: "moon", name: "Moon Base", cost: 500000000, income: 0, clickValue: 500000, icon: "🌑" },
 ];
 
 const EMPLOYEES: Employee[] = [
@@ -402,10 +379,16 @@ export default function Game() {
   const handleClick = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
       e.preventDefault();
-      const flexTier = Object.values(state.items).filter(v => v > 0).length;
-      const baseVal = 1 + Math.floor(state.followers * 0.005);
-      const flexMultiplier = 1 + (flexTier * 0.5);
-      const val = Math.floor(baseVal * flexMultiplier * (1 + state.clout * 0.5));
+      // Calculate click value: base from followers + flex items owned
+      const baseClick = 1 + Math.floor(state.followers * 0.005);
+      // Sum up clickValue from all owned flex items
+      const flexClickValue = ASSETS.reduce((total, asset) => {
+        return total + (state.items[asset.id] ? asset.clickValue : 0);
+      }, 0);
+      // Total before clout multiplier
+      const preCloutVal = baseClick + flexClickValue;
+      // Apply clout multiplier
+      const val = Math.floor(preCloutVal * (1 + state.clout * 0.5));
       setState((p) => {
         const newBux = p.bux + val;
         return {
@@ -466,6 +449,18 @@ export default function Game() {
   };
 
   const buy = (type: string, item: any, cost: number) => {
+    // Flex items must be purchased in ascending price order
+    if (type === "item") {
+      const assetIndex = ASSETS.findIndex(a => a.id === item.id);
+      if (assetIndex > 0) {
+        const prevAsset = ASSETS[assetIndex - 1];
+        if (!state.items[prevAsset.id]) {
+          // Previous item not owned - can't buy this one
+          return;
+        }
+      }
+    }
+    
     if (state.bux >= cost) {
       if ((window as any).playUpgradeSound) (window as any).playUpgradeSound();
       const key =
