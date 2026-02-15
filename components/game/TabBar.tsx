@@ -6,9 +6,9 @@ interface TabBarProps {
 }
 
 const TABS = [
-  { id: 'upgrades', icon: 'fa-bolt', label: 'Build' },
-  { id: 'flex', icon: 'fa-city', label: 'City' },
-  { id: 'team', icon: 'fa-users', label: 'Crew' },
+  { id: 'upgrades', icon: 'fa-bolt', label: 'Upgrades' },
+  { id: 'flex', icon: 'fa-city', label: 'Flex' },
+  { id: 'team', icon: 'fa-users', label: 'Team' },
   { id: 'launch', icon: 'fa-rocket', label: 'Launch' },
   { id: 'leaderboard', icon: 'fa-trophy', label: 'Top' },
   { id: 'daily', icon: 'fa-calendar', label: 'Daily' },

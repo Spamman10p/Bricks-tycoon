@@ -25,7 +25,7 @@ export const StatsHeader: React.FC<StatsHeaderProps> = ({ balance, profitPerSec 
 
                 {/* Profit Section */}
                 <div className="flex flex-col items-end">
-                    <span className="text-xs text-green-400 font-mono tracking-widest uppercase mb-1">PROFIT/SEC</span>
+                    <span className="text-xs text-green-400 font-mono tracking-widest uppercase mb-1">INCOME/SEC</span>
                     <div className="text-sm font-bold text-green-300 drop-shadow-md bg-green-900/40 px-2 py-1 rounded border border-green-500/30">
                         +${format(profitPerSec)}/s
                     </div>

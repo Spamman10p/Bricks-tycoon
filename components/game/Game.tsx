@@ -83,6 +83,19 @@ const UPGRADES: Upgrade[] = [
   { id: 5, name: "Influencer DM", cost: 10000, baseIncome: 450, icon: "📱" },
 ];
 
+// Cost/Income scaling - 30% compounding per level
+const SCALING_RATE = 1.30;
+
+const getUpgradeCost = (baseCost: number, ownedLevel: number): number => {
+  if (ownedLevel === 0) return baseCost;
+  return Math.floor(baseCost * Math.pow(SCALING_RATE, ownedLevel));
+};
+
+const getUpgradeIncome = (baseIncome: number, ownedLevel: number): number => {
+  if (ownedLevel === 0) return 0;
+  return Math.floor(baseIncome * Math.pow(SCALING_RATE, ownedLevel - 1));
+};
+
 const ASSETS: Asset[] = [
   { id: "rolex", name: "Gold Rolex", cost: 50000, income: 200, icon: "⌚" },
   {
@@ -391,9 +404,10 @@ export default function Game() {
   const handleClick = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
       e.preventDefault();
-      const val = Math.floor(
-        (1 + Math.floor(state.followers * 0.005)) * (1 + state.clout * 0.5),
-      );
+      const flexTier = Object.values(state.items).filter(v => v > 0).length;
+      const baseVal = 1 + Math.floor(state.followers * 0.005);
+      const flexMultiplier = 1 + (flexTier * 0.5);
+      const val = Math.floor(baseVal * flexMultiplier * (1 + state.clout * 0.5));
       setState((p) => {
         const newBux = p.bux + val;
         return {
@@ -566,16 +580,15 @@ export default function Game() {
               <div className="flex-1 overflow-y-auto p-4 pb-24 scrollbar-thin scrollbar-thumb-yellow-500/20 scrollbar-track-transparent">
                 {activePanel === "upgrades" &&
                   UPGRADES.map((u) => {
-                    const cost = Math.floor(
-                      u.cost * Math.pow(1.15, state.upgrades[u.id] || 0),
-                    );
+                    const currentLevel = state.upgrades[u.id] || 0;
+                    const cost = getUpgradeCost(u.cost, currentLevel);
                     return (
                       <UpgradeCard
                         key={u.id}
                         title={u.name}
                         level={state.upgrades[u.id] || 0}
                         cost={cost}
-                        baseIncome={u.baseIncome}
+                        baseIncome={getUpgradeIncome(u.baseIncome, currentLevel + 1)}
                         icon={u.icon}
                         canBuy={state.bux >= cost}
                         onBuy={() => buy("upgrade", u, cost)}
