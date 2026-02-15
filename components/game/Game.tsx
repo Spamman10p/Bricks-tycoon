@@ -378,6 +378,16 @@ export default function Game() {
     return () => clearInterval(timer);
   }, []);
 
+  // Force save on page close
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      const currentState = { ...state, lastOnline: new Date().toISOString() };
+      localStorage.setItem("bricksTycoon", JSON.stringify(currentState));
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [state]);
+
   const handleClick = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
       e.preventDefault();

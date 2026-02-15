@@ -22,39 +22,51 @@ export default function CoinLaunchpad({ followers, bux, luckBonus, onFinishLaunc
   // Calculate dynamic launch cost based on wealth
   // Min: 500, Max: 50,000, Scales with 0.1% of bux
   const launchCost = Math.max(500, Math.min(50000, Math.floor(bux * 0.001)));
-  
+
   // Scale multiplier for rewards (rich players get bigger multipliers)
   const wealthTier = bux >= 1000000 ? 5 : bux >= 100000 ? 3 : bux >= 10000 ? 2 : 1;
   const effectiveLuck = luckBonus + (wealthTier * 0.02); // +2-10% extra luck based on wealth
 
   const startTrading = () => {
     if (bux < launchCost) return;
-    
+
+    // BRICKS Easter Egg - 100% moon
+    const isBricks = coinName.toUpperCase() === "BRICKS" || ticker.toUpperCase() === "$BRICKS";
+    if (isBricks) {
+      const totalReturns = launchCost * 1000;
+      onPay(launchCost);
+      onFinishLaunch(Math.floor(totalReturns * 0.99), false);
+      if (typeof window !== 'undefined') {
+        window.alert("🚀 $BRICKS MOONED! +" + Math.floor(totalReturns * 0.99).toLocaleString() + " BUX!");
+      }
+      return;
+    }
+
     // Deduct cost
     onPay(launchCost);
-    
+
     // Scale starting market cap by wealth tier
     const scaledStart = 5000 * (wealthTier * 0.5 + 1);
-    
+
     setStep('trading');
     setMarketCap(scaledStart);
     setChartData([scaledStart]);
-    
+
     ref.current = setInterval(() => {
       setMarketCap(prev => {
         // More volatile for rich players (bigger swings = bigger potential)
         const volatility = 1 + (wealthTier * 0.2);
         const change = (Math.random() - 0.48 + effectiveLuck) * 0.1 * prev * volatility;
-        
+
         // Bigger spikes for rich players
         const spikeChance = 0.95 - (wealthTier * 0.02); // 93-95% threshold
         const dropChance = 0.98 - (wealthTier * 0.01); // 97-98% threshold
-        let spike = Math.random() > spikeChance ? prev * (0.3 + wealthTier * 0.1) : 
+        let spike = Math.random() > spikeChance ? prev * (0.3 + wealthTier * 0.1) :
                     Math.random() > dropChance ? -prev * (0.4 - wealthTier * 0.05) : 0;
-        
+
         const v = Math.max(100, prev + change + spike);
         setChartData(c => [...c.slice(-19), v]);
-        
+
         // Higher dev bag % for rich players
         const devShare = 0.05 + (wealthTier * 0.02); // 5-15%
         setDevBag(Math.floor(v * devShare));
@@ -105,38 +117,38 @@ export default function CoinLaunchpad({ followers, bux, luckBonus, onFinishLaunc
         </p>
       </div>
       <div className="flex gap-2">
-        <input 
-          value={coinName} 
-          onChange={e => setCoinName(e.target.value)} 
-          className="bg-black text-white p-2 rounded w-full outline-none border border-gray-700 focus:border-yellow-500" 
-          placeholder="Token Name" 
+        <input
+          value={coinName}
+          onChange={e => setCoinName(e.target.value)}
+          className="bg-black text-white p-2 rounded w-full outline-none border border-gray-700 focus:border-yellow-500"
+          placeholder="Token Name"
         />
-        <button 
+        <button
           onClick={() => {
             const names = ["ScamCoin", "MoonInu", "ElonTusk", "DogeKiller", "SafeMars", "BrickToken", "RugPull", "YoloBet", "BasedGod", "WAGMI", "NGMI", "HODL"];
             const tickers = ["$SCAM", "$MOON", "$TUSK", "$KILL", "$SAFE", "$BRICK", "$RUG", "$YOLO", "$BASED", "$WAGMI", "$NGMI", "$HODL"];
             const idx = Math.floor(Math.random() * names.length);
             setCoinName(names[idx]);
             setTicker(tickers[idx]);
-          }} 
-          className="bg-gray-700 hover:bg-gray-600 p-2 rounded text-xl" 
+          }}
+          className="bg-gray-700 hover:bg-gray-600 p-2 rounded text-xl"
           title="Randomize"
         >
           🎲
         </button>
       </div>
-      <input 
-        value={ticker} 
-        onChange={e => setTicker(e.target.value)} 
-        className="bg-black text-white p-2 rounded w-full outline-none border border-gray-700 focus:border-yellow-500" 
-        placeholder="Ticker (e.g. $PEPE)" 
+      <input
+        value={ticker}
+        onChange={e => setTicker(e.target.value)}
+        className="bg-black text-white p-2 rounded w-full outline-none border border-gray-700 focus:border-yellow-500"
+        placeholder="Ticker (e.g. $PEPE)"
       />
-      <button 
-        disabled={bux < launchCost || !coinName} 
-        onClick={startTrading} 
+      <button
+        disabled={bux < launchCost || !coinName}
+        onClick={startTrading}
         className={`w-full py-3 rounded font-bold transition-all ${
-          bux >= launchCost && coinName 
-            ? 'bg-yellow-500 text-black hover:bg-yellow-400 active:scale-95' 
+          bux >= launchCost && coinName
+            ? 'bg-yellow-500 text-black hover:bg-yellow-400 active:scale-95'
             : 'bg-gray-600 text-gray-400 cursor-not-allowed'
         }`}
       >
@@ -171,8 +183,8 @@ export default function CoinLaunchpad({ followers, bux, luckBonus, onFinishLaunc
       <div className={`font-mono text-2xl my-4 font-bold ${devBag > 0 ? 'text-green-400' : 'text-red-400'}`}>
         {devBag > 0 ? '+' : ''}${devBag.toLocaleString()}
       </div>
-      <button 
-        onClick={() => setStep('create')} 
+      <button
+        onClick={() => setStep('create')}
         className="w-full bg-white hover:bg-gray-200 text-black font-bold py-3 rounded active:scale-95"
       >
         LAUNCH ANOTHER
