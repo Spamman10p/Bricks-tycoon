@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="ghettoSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+    <linearGradient id="ghettoGround" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2d2d2d"/>
+      <stop offset="100%" style="stop-color:#1a1a1a"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Sky -->
+  <rect width="1200" height="800" fill="url(#ghettoSky)"/>
+  
+  <!-- Stars -->
+  <circle cx="100" cy="100" r="1" fill="white" opacity="0.5"/>
+  <circle cx="300" cy="50" r="1.5" fill="white" opacity="0.3"/>
+  <circle cx="500" cy="80" r="1" fill="white" opacity="0.4"/>
+  <circle cx="700" cy="40" r="1.5" fill="white" opacity="0.5"/>
+  <circle cx="900" cy="120" r="1" fill="white" opacity="0.3"/>
+  <circle cx="1100" cy="60" r="1.5" fill="white" opacity="0.4"/>
+  
+  <!-- Distant buildings silhouette -->
+  <path d="M0,500 L50,450 L100,500 L150,420 L200,500 L250,380 L300,500 L350,440 L400,500 L450,460 L500,500 L550,400 L600,500 L650,470 L700,500 L750,410 L800,500 L850,450 L900,500 L950,390 L1000,500 L1050,460 L1100,500 L1150,420 L1200,500 L1200,800 L0,800 Z" fill="#0f0f1a" opacity="0.7"/>
+  
+  <!-- Ground/Platform base -->
+  <rect x="0" y="600" width="1200" height="200" fill="url(#ghettoGround)"/>
+  
+  <!-- Street lines -->
+  <line x1="0" y1="620" x2="1200" y2="620" stroke="#3d3d3d" stroke-width="2"/>
+  <line x1="0" y1="750" x2="1200" y2="750" stroke="#3d3d3d" stroke-width="2"/>
+  
+  <!-- Platform where character stands -->
+  <rect x="500" y="580" width="200" height="40" fill="#2d2d2d" stroke="#4d4d4d" stroke-width="2"/>
+  <rect x="520" y="560" width="160" height="20" fill="#3d3d3d"/>
+  
+  <!-- Grime/dirt texture -->
+  <circle cx="100" cy="650" r="3" fill="#333" opacity="0.5"/>
+  <circle cx="300" cy="700" r="4" fill="#333" opacity="0.4"/>
+  <circle cx="600" cy="680" r="3" fill="#333" opacity="0.3"/>
+  <circle cx="900" cy="720" r="5" fill="#333" opacity="0.4"/>
+</svg>

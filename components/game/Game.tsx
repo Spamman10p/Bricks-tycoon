@@ -479,7 +479,7 @@ export default function Game() {
     <div className="w-full h-screen relative overflow-hidden flex flex-col bg-[#1a1a1a]">
       <SoundManager />
       {/* Layer 0: Background & Dynamic City */}
-      <BackgroundManager level={state.clout} />
+      <BackgroundManager bux={state.bux} level={state.clout} />
       <GoldenBrick baseIncome={income} onCollect={() => {}} />
       <EventsSystem onBonusApply={(bonus) => {}} />
 
@@ -521,8 +521,8 @@ export default function Game() {
         </div>
       ))}
 
-      {/* Layer 2: Main Clicker Area */}
-      <div className="flex-1 flex items-center justify-center z-10">
+      {/* Layer 2: Main Clicker Area - Positioned higher up */}
+      <div className="absolute top-[20%] left-0 right-0 flex justify-center z-10">
         <ClickerArea onClick={handleClick} />
       </div>
 
