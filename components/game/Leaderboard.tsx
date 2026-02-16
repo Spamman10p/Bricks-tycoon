@@ -26,7 +26,6 @@ export default function Leaderboard({ currentBux, currentClout, playerName = 'Yo
   const [userRank, setUserRank] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState('23:59:59');
   const [isLoading, setIsLoading] = useState(true);
-  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
   const [isOwnEntry, setIsOwnEntry] = useState(false);
 
   const format = (n: number): string => {
@@ -43,8 +42,9 @@ export default function Leaderboard({ currentBux, currentClout, playerName = 'Yo
     const fetchLeaderboard = async () => {
       setIsLoading(true);
       
-      // Only save score on initial load
-      if (playerName && currentBux > 0 && !hasInitiallyLoaded) {
+      // Only save score on initial load - use localStorage to track
+      const saveKey = `lb_saved_${playerName}`;
+      if (playerName && currentBux > 0 && !localStorage.getItem(saveKey)) {
         try {
           // First check if player exists
           const checkRes = await fetch(
@@ -88,7 +88,7 @@ export default function Leaderboard({ currentBux, currentClout, playerName = 'Yo
               })
             });
           }
-          setHasInitiallyLoaded(true);
+          localStorage.setItem(saveKey, 'true');
         } catch (e) { console.error('Failed to save score:', e); }
       }
       
@@ -104,7 +104,19 @@ export default function Leaderboard({ currentBux, currentClout, playerName = 'Yo
         const playerIndex = data.findIndex(p => p.player_name === playerName);
         setIsOwnEntry(playerIndex >= 0);
         
-        setPlayers(data);
+        // Deduplicate by player_name - keep highest score for each
+        const deduped = data.reduce((acc: LeaderboardEntry[], p) => {
+          const existing = acc.find(x => x.player_name === p.player_name);
+          if (!existing || p.bux > existing.bux) {
+            return [...acc.filter(x => x.player_name !== p.player_name), p];
+          }
+          return acc;
+        }, []);
+        
+        // Sort by bux descending
+        deduped.sort((a: LeaderboardEntry, b: LeaderboardEntry) => b.bux - a.bux);
+        
+        setPlayers(deduped);
         
         // Calculate user rank
         const userScore = calculateScore(currentBux, currentClout);
