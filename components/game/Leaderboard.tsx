@@ -42,13 +42,13 @@ export default function Leaderboard({ currentBux, currentClout, playerName = 'Yo
     const fetchLeaderboard = async () => {
       setIsLoading(true);
       
-      // Only save score on initial load - use localStorage to track
-      const saveKey = `lb_saved_${playerName}`;
-      if (playerName && currentBux > 0 && !localStorage.getItem(saveKey)) {
+      // Only save score on initial load - use localStorage to track per username
+      const saveKey = `lb_saved_${playerName}_${Math.floor(currentBux / 1000000)}`; // Key includes bux range to allow updates on significant gains
+      if (playerName && currentBux > 0) {
         try {
-          // First check if player exists
+          // Check and update/insert - this is atomic-ish
           const checkRes = await fetch(
-            `https://qwxuamrbztltmdvtmmeb.supabase.co/rest/v1/leaderboard?player_name=eq.${encodeURIComponent(playerName)}`,
+            `https://qwxuamrbztltmdvtmmeb.supabase.co/rest/v1/leaderboard?player_name=eq.${encodeURIComponent(playerName)}&limit=1`,
             {
               headers: {
                 'apikey': 'sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
@@ -59,21 +59,23 @@ export default function Leaderboard({ currentBux, currentClout, playerName = 'Yo
           const existing = await checkRes.json();
           
           if (existing && existing.length > 0) {
-            // Update existing
-            await fetch(
-              `https://qwxuamrbztltmdvtmmeb.supabase.co/rest/v1/leaderboard?player_name=eq.${encodeURIComponent(playerName)}`,
-              {
-                method: 'PATCH',
-                headers: {
-                  'apikey': 'sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
-                  'Authorization': 'Bearer sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ bux: currentBux, clout: currentClout })
-              }
-            );
+            // Only update if score is higher
+            if (currentBux > existing[0].bux) {
+              await fetch(
+                `https://qwxuamrbztltmdvtmmeb.supabase.co/rest/v1/leaderboard?player_name=eq.${encodeURIComponent(playerName)}`,
+                {
+                  method: 'PATCH',
+                  headers: {
+                    'apikey': 'sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
+                    'Authorization': 'Bearer sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({ bux: currentBux, clout: currentClout })
+                }
+              );
+            }
           } else {
-            // Insert new
+            // Insert new only if doesn't exist
             await fetch('https://qwxuamrbztltmdvtmmeb.supabase.co/rest/v1/leaderboard', {
               method: 'POST',
               headers: {
@@ -88,7 +90,6 @@ export default function Leaderboard({ currentBux, currentClout, playerName = 'Yo
               })
             });
           }
-          localStorage.setItem(saveKey, 'true');
         } catch (e) { console.error('Failed to save score:', e); }
       }
       
