@@ -29,6 +29,8 @@ interface GameState {
   items: Record<string, number>;
   staff: Record<string, number>;
   clout: number;
+  // Username for leaderboard
+  username: string;
   // Tracking fields
   totalClicks: number;
   totalEarned: number;
@@ -181,6 +183,7 @@ const DEFAULT_STATE: GameState = {
   items: {},
   staff: {},
   clout: 0,
+  username: "",
   // Tracking
   totalClicks: 0,
   totalEarned: 0,
@@ -485,15 +488,68 @@ export default function Game() {
     }
   };
 
-  const doPrestige = () => {
+  const doPrestige = async () => {
     if (state.bux < 10000000) return;
     const earned = Math.floor(state.bux / 10000000);
     if ((window as any).playPrestigeSound) (window as any).playPrestigeSound();
-    setState({ ...DEFAULT_STATE, clout: state.clout + earned });
+    
+    // Save score to leaderboard before reset
+    if (state.username) {
+      try {
+        await fetch('https://qwxuamrbztltmdvtmmeb.supabase.co/rest/v1/leaderboard', {
+          method: 'POST',
+          headers: {
+            'apikey': 'sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
+            'Authorization': 'Bearer sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates'
+          },
+          body: JSON.stringify({
+            player_name: state.username,
+            bux: state.bux,
+            clout: state.clout
+          })
+        });
+      } catch (e) { console.error('Failed to save score:', e); }
+    }
+    
+    setState({ ...DEFAULT_STATE, username: state.username, clout: state.clout + earned });
   };
 
   return (
     <div className="w-full h-screen relative overflow-hidden flex flex-col bg-[#1a1a1a]">
+      {/* Username Modal - Required on first play */}
+      {!state.username && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm">
+          <div className="glass-panel p-8 rounded-2xl border-2 border-yellow-500 max-w-sm w-full mx-4">
+            <h2 className="text-2xl font-bold text-yellow-400 text-center mb-4">👾 CHOOSE USERNAME</h2>
+            <p className="text-gray-400 text-center mb-6">This will appear on the leaderboard</p>
+            <input
+              type="text"
+              id="usernameInput"
+              placeholder="Enter username..."
+              maxLength={15}
+              className="w-full px-4 py-3 rounded-lg bg-black/50 border border-yellow-500/50 text-white text-center text-lg focus:border-yellow-400 outline-none mb-4"
+              onKeyDown={(e) => e.key === 'Enter' && (document.getElementById('submitUsername') as HTMLButtonElement)?.click()}
+            />
+            <button
+              id="submitUsername"
+              onClick={() => {
+                const input = document.getElementById('usernameInput') as HTMLInputElement;
+                const name = input.value.trim();
+                if (name.length >= 3) {
+                  setState(p => ({ ...p, username: name }));
+                }
+              }}
+              className="w-full py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-lg transition-colors"
+            >
+              START GAME
+            </button>
+            <p className="text-gray-500 text-xs text-center mt-4">Min 3 characters</p>
+          </div>
+        </div>
+      )}
+
       <SoundManager />
       {/* Layer 0: Background & Dynamic City */}
       <BackgroundManager bux={state.bux} level={state.clout} />
@@ -673,6 +729,7 @@ export default function Game() {
                   <Leaderboard
                     currentBux={state.bux}
                     currentClout={state.clout}
+                    playerName={state.username}
                   />
                 )}
 

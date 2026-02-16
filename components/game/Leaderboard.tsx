@@ -26,6 +26,7 @@ export default function Leaderboard({ currentBux, currentClout, playerName = 'Yo
   const [userRank, setUserRank] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState('23:59:59');
   const [isLoading, setIsLoading] = useState(true);
+  const [isOwnEntry, setIsOwnEntry] = useState(false);
 
   const format = (n: number): string => {
     if (n >= 1e12) return (n / 1e12).toFixed(2) + 'T';
@@ -40,6 +41,28 @@ export default function Leaderboard({ currentBux, currentClout, playerName = 'Yo
   useEffect(() => {
     const fetchLeaderboard = async () => {
       setIsLoading(true);
+      
+      // First, upsert current player's score if they have a username
+      if (playerName && currentBux > 0) {
+        try {
+          await fetch('https://qwxuamrbztltmdvtmmeb.supabase.co/rest/v1/leaderboard', {
+            method: 'POST',
+            headers: {
+              'apikey': 'sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
+              'Authorization': 'Bearer sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
+              'Content-Type': 'application/json',
+              'Prefer': 'resolution=merge-duplicates'
+            },
+            body: JSON.stringify({
+              player_name: playerName,
+              bux: currentBux,
+              clout: currentClout
+            })
+          });
+        } catch (e) { console.error('Failed to save score:', e); }
+      }
+      
+      // Now fetch updated leaderboard
       const { data, error } = await supabase
         .from('leaderboard')
         .select('*')
@@ -47,6 +70,10 @@ export default function Leaderboard({ currentBux, currentClout, playerName = 'Yo
         .limit(20);
 
       if (!error && data) {
+        // Mark if player is in the list
+        const playerIndex = data.findIndex(p => p.player_name === playerName);
+        setIsOwnEntry(playerIndex >= 0);
+        
         setPlayers(data);
         
         // Calculate user rank
@@ -70,7 +97,7 @@ export default function Leaderboard({ currentBux, currentClout, playerName = 'Yo
     };
 
     fetchLeaderboard();
-  }, [currentBux, currentClout]);
+  }, [currentBux, currentClout, playerName]);
 
   // Countdown timer
   useEffect(() => {
@@ -103,9 +130,10 @@ export default function Leaderboard({ currentBux, currentClout, playerName = 'Yo
           {/* Top 3 Podium */}
           <div className="flex justify-center items-end gap-2 mb-4">
             {players.slice(0, 3).map((p, i) => (
-              <div key={p.id} className={`text-center p-2 rounded ${i === 0 ? 'bg-yellow-900/30' : i === 1 ? 'bg-gray-700/30' : 'bg-orange-900/30'}`}>
+              <div key={p.id} className={`text-center p-2 rounded ${i === 0 ? 'bg-yellow-900/30' : i === 1 ? 'bg-gray-700/30' : 'bg-orange-900/30'} ${p.player_name === playerName ? 'border-2 border-blue-500' : ''}`}>
                 <div className="text-2xl">{i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</div>
                 <div className="text-xs text-white font-bold truncate w-16">{p.player_name}</div>
+                {p.player_name === playerName && <div className="text-blue-300 text-xs">(You)</div>}
                 <div className="text-xs text-green-400">{format(p.bux)}</div>
               </div>
             ))}
@@ -113,18 +141,28 @@ export default function Leaderboard({ currentBux, currentClout, playerName = 'Yo
 
           {/* Rest of list */}
           <div className="space-y-1 max-h-48 overflow-y-auto">
-            {players.slice(3).map((p) => (
-              <div key={p.id} className="flex justify-between items-center p-2 rounded bg-gray-800/50 text-sm">
+            {players.slice(3).map((p, idx) => (
+              <div key={p.id} className={`flex justify-between items-center p-2 rounded text-sm ${p.player_name === playerName ? 'bg-blue-900/50 border border-blue-500' : 'bg-gray-800/50'}`}>
                 <div className="flex items-center gap-2">
-                  <span className="text-gray-400 w-6">{p.id}</span>
+                  <span className="text-gray-400 w-6">{idx + 4}</span>
                   <span className="text-white">{p.player_name}</span>
+                  {p.player_name === playerName && <span className="text-blue-300 text-xs">(You)</span>}
                 </div>
                 <span className="text-green-400 font-mono">{format(p.bux)}</span>
               </div>
             ))}
           </div>
 
-          {/* User position */}
+          {/* User position if not in top 20 */}
+          {userRank && userRank > 20 && (
+            <div className="mt-4 p-2 rounded bg-blue-900/50 border border-blue-500">
+              <div className="flex justify-between items-center">
+                <span className="text-blue-300">Your Rank: #{userRank}</span>
+                <span className="text-white font-bold">{playerName}</span>
+                <span className="text-green-400 font-mono">{format(currentBux)}</span>
+              </div>
+            </div>
+          )}
           {userRank && userRank <= 20 && (
             <div className="mt-4 p-2 rounded bg-blue-900/30 border border-blue-500">
               <div className="flex justify-between items-center">
