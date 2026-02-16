@@ -43,23 +43,51 @@ export default function Leaderboard({ currentBux, currentClout, playerName = 'Yo
     const fetchLeaderboard = async () => {
       setIsLoading(true);
       
-      // Only save score on initial load, not on every change
+      // Only save score on initial load
       if (playerName && currentBux > 0 && !hasInitiallyLoaded) {
         try {
-          await fetch('https://qwxuamrbztltmdvtmmeb.supabase.co/rest/v1/leaderboard', {
-            method: 'POST',
-            headers: {
-              'apikey': 'sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
-              'Authorization': 'Bearer sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
-              'Content-Type': 'application/json',
-              'Prefer': 'resolution=merge-duplicates'
-            },
-            body: JSON.stringify({
-              player_name: playerName,
-              bux: currentBux,
-              clout: currentClout
-            })
-          });
+          // First check if player exists
+          const checkRes = await fetch(
+            `https://qwxuamrbztltmdvtmmeb.supabase.co/rest/v1/leaderboard?player_name=eq.${encodeURIComponent(playerName)}`,
+            {
+              headers: {
+                'apikey': 'sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
+                'Authorization': 'Bearer sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O'
+              }
+            }
+          );
+          const existing = await checkRes.json();
+          
+          if (existing && existing.length > 0) {
+            // Update existing
+            await fetch(
+              `https://qwxuamrbztltmdvtmmeb.supabase.co/rest/v1/leaderboard?player_name=eq.${encodeURIComponent(playerName)}`,
+              {
+                method: 'PATCH',
+                headers: {
+                  'apikey': 'sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
+                  'Authorization': 'Bearer sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ bux: currentBux, clout: currentClout })
+              }
+            );
+          } else {
+            // Insert new
+            await fetch('https://qwxuamrbztltmdvtmmeb.supabase.co/rest/v1/leaderboard', {
+              method: 'POST',
+              headers: {
+                'apikey': 'sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
+                'Authorization': 'Bearer sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                player_name: playerName,
+                bux: currentBux,
+                clout: currentClout
+              })
+            });
+          }
           setHasInitiallyLoaded(true);
         } catch (e) { console.error('Failed to save score:', e); }
       }
