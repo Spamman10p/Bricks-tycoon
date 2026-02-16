@@ -496,20 +496,49 @@ export default function Game() {
     // Save score to leaderboard before reset
     if (state.username) {
       try {
-        await fetch('https://qwxuamrbztltmdvtmmeb.supabase.co/rest/v1/leaderboard', {
-          method: 'POST',
-          headers: {
-            'apikey': 'sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
-            'Authorization': 'Bearer sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
-            'Content-Type': 'application/json',
-            'Prefer': 'resolution=merge-duplicates'
-          },
-          body: JSON.stringify({
-            player_name: state.username,
-            bux: state.bux,
-            clout: state.clout
-          })
-        });
+        // Check if exists first
+        const checkRes = await fetch(
+          `https://qwxuamrbztltmdvtmmeb.supabase.co/rest/v1/leaderboard?player_name=eq.${encodeURIComponent(state.username)}&limit=1`,
+          {
+            headers: {
+              'apikey': 'sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
+              'Authorization': 'Bearer sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O'
+            }
+          }
+        );
+        const existing = await checkRes.json();
+        
+        if (existing && existing.length > 0) {
+          // Update if higher score
+          if (state.bux > existing[0].bux) {
+            await fetch(
+              `https://qwxuamrbztltmdvtmmeb.supabase.co/rest/v1/leaderboard?player_name=eq.${encodeURIComponent(state.username)}`,
+              {
+                method: 'PATCH',
+                headers: {
+                  'apikey': 'sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
+                  'Authorization': 'Bearer sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ bux: state.bux, clout: state.clout + earned })
+              }
+            );
+          }
+        } else {
+          await fetch('https://qwxuamrbztltmdvtmmeb.supabase.co/rest/v1/leaderboard', {
+            method: 'POST',
+            headers: {
+              'apikey': 'sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
+              'Authorization': 'Bearer sb_publishable_Hhh-7A3Ady1SdezkPoL3EA_7WwRhX4O',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              player_name: state.username,
+              bux: state.bux,
+              clout: state.clout + earned
+            })
+          });
+        }
       } catch (e) { console.error('Failed to save score:', e); }
     }
     
