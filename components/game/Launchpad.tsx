@@ -30,18 +30,6 @@ export default function CoinLaunchpad({ followers, bux, luckBonus, onFinishLaunc
   const startTrading = () => {
     if (bux < launchCost) return;
 
-    // BRICKS Easter Egg - 100% moon
-    const isBricks = coinName.toUpperCase() === "BRICKS" || ticker.toUpperCase() === "$BRICKS";
-    if (isBricks) {
-      const totalReturns = launchCost * 1000;
-      onPay(launchCost);
-      onFinishLaunch(Math.floor(totalReturns * 0.99), false);
-      if (typeof window !== 'undefined') {
-        window.alert("🚀 $BRICKS MOONED! +" + Math.floor(totalReturns * 0.99).toLocaleString() + " BUX!");
-      }
-      return;
-    }
-
     // Deduct cost
     onPay(launchCost);
 

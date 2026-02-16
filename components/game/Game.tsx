@@ -86,17 +86,21 @@ const UPGRADES: Upgrade[] = [
   { id: 5, name: "Influencer DM", cost: 10000, baseIncome: 450, icon: "📱" },
 ];
 
-// Cost/Income scaling - 30% compounding per level
-const SCALING_RATE = 1.30;
+// Cost scaling - 50% per level (Task 1)
+// Income scaling - 20% per level (Task 1)
+// Max level - 50 (Task 2)
+const COST_SCALING_RATE = 1.50;
+const INCOME_SCALING_RATE = 1.20;
+const MAX_UPGRADE_LEVEL = 50;
 
 const getUpgradeCost = (baseCost: number, ownedLevel: number): number => {
   if (ownedLevel === 0) return baseCost;
-  return Math.floor(baseCost * Math.pow(SCALING_RATE, ownedLevel));
+  return Math.floor(baseCost * Math.pow(COST_SCALING_RATE, ownedLevel));
 };
 
 const getUpgradeIncome = (baseIncome: number, ownedLevel: number): number => {
   if (ownedLevel === 0) return 0;
-  return Math.floor(baseIncome * Math.pow(SCALING_RATE, ownedLevel - 1));
+  return Math.floor(baseIncome * Math.pow(INCOME_SCALING_RATE, ownedLevel - 1));
 };
 
 const ASSETS: Asset[] = [
@@ -668,7 +672,7 @@ export default function Game() {
                         cost={cost}
                         baseIncome={getUpgradeIncome(u.baseIncome, currentLevel + 1)}
                         icon={u.icon}
-                        canBuy={state.bux >= cost}
+                        canBuy={state.bux >= cost && currentLevel < MAX_UPGRADE_LEVEL}
                         onBuy={() => buy("upgrade", u, cost)}
                       />
                     );
