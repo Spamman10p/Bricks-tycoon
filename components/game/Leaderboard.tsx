@@ -93,11 +93,10 @@ export default function Leaderboard({ currentBux, currentClout, playerName = 'Yo
         } catch (e) { console.error('Failed to save score:', e); }
       }
       
-      // Now fetch updated leaderboard - only show players with clout (real players who prestiged)
+      // Now fetch updated leaderboard - show all players, sorted by bux
       const { data, error } = await supabase
         .from('leaderboard')
         .select('*')
-        .gt('clout', 0)  // Only show real players who have prestiged
         .order('bux', { ascending: false })
         .limit(20);
 
