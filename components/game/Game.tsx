@@ -98,14 +98,14 @@ const getUpgradeIncome = (baseIncome: number, ownedLevel: number): number => {
 };
 
 const ASSETS: Asset[] = [
-  { id: "rolex", name: "Gold Rolex", cost: 50000, income: 0, clickValue: 100, icon: "⌚" },
+  { id: "rolex", name: "Gold Rolex", cost: 50000, income: 0, clickValue: 99, icon: "⌚" },
   { id: "designer", name: "Designer Drip", cost: 250000, income: 0, clickValue: 500, icon: "🧥" },
-  { id: "lambo", name: "Lambo", cost: 1000000, income: 0, clickValue: 2000, icon: "🚗" },
-  { id: "yacht", name: "Yacht", cost: 5000000, income: 0, clickValue: 10000, icon: "🛥️" },
-  { id: "jet", name: "Private Jet", cost: 15000000, income: 0, clickValue: 30000, icon: "✈️" },
-  { id: "penthouse", name: "Penthouse", cost: 35000000, income: 0, clickValue: 50000, icon: "🏙️" },
-  { id: "island", name: "Private Island", cost: 150000000, income: 0, clickValue: 100000, icon: "🏝️" },
-  { id: "moon", name: "Moon Base", cost: 500000000, income: 0, clickValue: 500000, icon: "🌑" },
+  { id: "lambo", name: "Lambo", cost: 1000000, income: 0, clickValue: 1500, icon: "🚗" },
+  { id: "yacht", name: "Yacht", cost: 5000000, income: 0, clickValue: 8000, icon: "🛥️" },
+  { id: "penthouse", name: "Penthouse", cost: 20000000, income: 0, clickValue: 20000, icon: "🏙️" },
+  { id: "jet", name: "Private Jet", cost: 35000000, income: 0, clickValue: 22000, icon: "✈️" },
+  { id: "island", name: "Private Island", cost: 150000000, income: 0, clickValue: 50000, icon: "🏝️" },
+  { id: "moon", name: "Moon Base", cost: 500000000, income: 0, clickValue: 400000, icon: "🌑" },
 ];
 
 const EMPLOYEES: Employee[] = [
