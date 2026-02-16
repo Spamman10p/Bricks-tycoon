@@ -26,6 +26,7 @@ export default function Leaderboard({ currentBux, currentClout, playerName = 'Yo
   const [userRank, setUserRank] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState('23:59:59');
   const [isLoading, setIsLoading] = useState(true);
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
   const [isOwnEntry, setIsOwnEntry] = useState(false);
 
   const format = (n: number): string => {
@@ -42,8 +43,8 @@ export default function Leaderboard({ currentBux, currentClout, playerName = 'Yo
     const fetchLeaderboard = async () => {
       setIsLoading(true);
       
-      // First, upsert current player's score if they have a username
-      if (playerName && currentBux > 0) {
+      // Only save score on initial load, not on every change
+      if (playerName && currentBux > 0 && !hasInitiallyLoaded) {
         try {
           await fetch('https://qwxuamrbztltmdvtmmeb.supabase.co/rest/v1/leaderboard', {
             method: 'POST',
@@ -59,6 +60,7 @@ export default function Leaderboard({ currentBux, currentClout, playerName = 'Yo
               clout: currentClout
             })
           });
+          setHasInitiallyLoaded(true);
         } catch (e) { console.error('Failed to save score:', e); }
       }
       
@@ -97,7 +99,7 @@ export default function Leaderboard({ currentBux, currentClout, playerName = 'Yo
     };
 
     fetchLeaderboard();
-  }, [currentBux, currentClout, playerName]);
+  }, []); // Only run once when leaderboard opens
 
   // Countdown timer
   useEffect(() => {
